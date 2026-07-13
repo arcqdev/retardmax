@@ -29,6 +29,7 @@ declare namespace App {
 interface Env {
   DB: D1Database;
   MEDIA: R2Bucket;
+  ASSETS?: Fetcher;
   SITE_URL: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
