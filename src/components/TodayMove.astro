@@ -1,0 +1,25 @@
+---
+// Today's move is already logged: the composer would only 409, so show the move
+// and the one action that's left — put it on the board.
+import PayButton from './PayButton';
+const { post, streak } = Astro.props;
+const isPublic = post.visibility === 'public';
+---
+<div class={`card space-y-4 p-5 sm:p-6 ${isPublic ? 'border-white/15' : 'border-flame/25'}`}>
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <p class="eyebrow">{isPublic ? 'Today · on the board' : 'Today · logged, still private'}</p>
+      <h2 class="font-display text-3xl sm:text-4xl">{isPublic ? 'YOU’RE UP THERE.' : 'MOVE LOGGED.'}</h2>
+    </div>
+    <span class="shrink-0 text-sm font-bold text-white/45" title={`${streak}-day streak`}>🔥 {streak}</span>
+  </div>
+  <a href={`/p/${post.id}`} class="block whitespace-pre-wrap border-l-2 border-flame/40 pl-3 text-lg font-bold leading-snug tracking-tight hover:text-white/80">{post.body}</a>
+  {isPublic ? (
+    <p class="text-sm font-bold text-white/45">One move a day — that’s the whole point. Next one’s tomorrow. <a class="text-flame hover:underline" href={`/p/${post.id}`}>Go collect your Ws →</a></p>
+  ) : (
+    <div class="space-y-2">
+      <PayButton client:load postId={post.id} />
+      <p class="text-center text-xs font-bold text-white/35">Or keep it in the log. Nobody sees it, nobody votes on it.</p>
+    </div>
+  )}
+</div>

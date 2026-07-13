@@ -3,8 +3,50 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Composer from '@/components/Composer';
 import PostCard from '@/components/PostCard.astro';
 import Landing from '@/components/Landing.astro';
+import TodayMove from '@/components/TodayMove.astro';
 import { topToday, feedPosts, userGroups } from '@/lib/data';
 import { getEnv } from '@/lib/env';
-const env = getEnv(Astro.locals); const user = Astro.locals.user; const today = await topToday(env.DB, user?.id); const fresh = (await feedPosts(env.DB, { date: new Date().toISOString().slice(0, 10), publicOnly: true, userId: user?.id, limit: 30 })).filter((p) => !today.some((t) => t.id === p.id)); const groups = user ? await userGroups(env.DB, user.id) : [];
+import { utcDate } from '@/lib/utils';
+
+const env = getEnv(Astro.locals);
+const user = Astro.locals.user;
+const today = utcDate();
+const picks = await topToday(env.DB, user?.id);
+const fresh = (await feedPosts(env.DB, { date: today, publicOnly: true, userId: user?.id, limit: 30 })).filter((p) => !picks.some((t) => t.id === p.id));
+const groups = user ? await userGroups(env.DB, user.id) : [];
+const [myMove] = user ? await feedPosts(env.DB, { date: today, authorId: user.id, userId: user.id, limit: 1 }) : [];
 ---
-<BaseLayout title="Today’s Picks — RETARDMAX"><section class="space-y-10">{user ? <div class="space-y-6"><div class="space-y-3"><p class="eyebrow">{new Date().toISOString().slice(0, 10)} · UTC</p><h1 class="font-display text-6xl leading-[0.9] sm:text-8xl">TODAY’S<br /><span class="text-flame">PICKS.</span></h1><p class="max-w-lg text-lg font-bold text-white/55">One bold move. One receipt. The board is watching.</p></div><Composer client:load groups={groups} /></div> : <Landing />}<div class="space-y-4"><div class="flex items-end justify-between gap-3"><div><p class="eyebrow">Editorial leaderboard</p><h2 class="font-display text-4xl sm:text-5xl">TODAY’S TOP 10</h2></div><span class="shrink-0 text-sm font-bold text-white/40">Ws + boosts × 5</span></div>{today.length ? today.map((post, i) => <PostCard post={post} user={user} rank={i + 1} />) : <div class="card p-8 text-center text-lg font-bold text-white/50">Board’s empty. Somebody’s about to be first on the wall.</div>}</div>{fresh.length > 0 && <div class="space-y-4"><h2 class="font-display text-4xl sm:text-5xl">FRESH TODAY</h2>{fresh.map((post) => <PostCard post={post} user={user} />)}</div>}</section></BaseLayout>
+<BaseLayout title="Today’s Picks — RETARDMAX">
+  <section class="space-y-10">
+    {user ? (
+      <div class="space-y-6">
+        <div class="space-y-3">
+          <p class="eyebrow">{today} · UTC</p>
+          <h1 class="font-display text-6xl leading-[0.9] sm:text-8xl">TODAY’S<br /><span class="text-flame">PICKS.</span></h1>
+          <p class="max-w-lg text-lg font-bold text-white/55">One bold move. One receipt. The board is watching.</p>
+        </div>
+        {myMove ? <TodayMove post={myMove} streak={user.streakCount} /> : <Composer client:load groups={groups} />}
+      </div>
+    ) : <Landing />}
+
+    <div class="space-y-4">
+      <div class="flex flex-wrap items-end justify-between gap-x-3 gap-y-1">
+        <div>
+          <p class="eyebrow">Editorial leaderboard</p>
+          <h2 class="font-display text-4xl sm:text-5xl">TODAY’S TOP 10</h2>
+        </div>
+        <span class="shrink-0 text-sm font-bold text-white/40">Ws + boosts × 5</span>
+      </div>
+      {picks.length
+        ? picks.map((post, i) => <PostCard post={post} user={user} rank={i + 1} stat={{ value: post.dailyScore, label: 'PTS' }} />)
+        : <div class="card p-8 text-center"><p class="font-display text-2xl">BOARD’S EMPTY.</p><p class="mt-1 font-bold text-white/50">Somebody’s about to be first on the wall.</p></div>}
+    </div>
+
+    {fresh.length > 0 && (
+      <div class="space-y-4">
+        <h2 class="font-display text-4xl sm:text-5xl">FRESH TODAY</h2>
+        {fresh.map((post) => <PostCard post={post} user={user} />)}
+      </div>
+    )}
+  </section>
+</BaseLayout>

@@ -31,8 +31,9 @@ export default function Composer({ groups = [] }: { groups?: Group[] }) {
     const form = new FormData(event.currentTarget);
     try {
       const response = await fetch('/api/posts', { method: 'POST', body: form });
-      const data = await response.json().catch(() => ({})) as { error?: string };
-      if (response.ok) { location.reload(); return; }
+      const data = await response.json().catch(() => ({})) as { error?: string; postId?: string };
+      // Land on the post itself: it's the only place the move is visible and the $1 board CTA lives.
+      if (response.ok && data.postId) { location.href = `/p/${data.postId}`; return; }
       if (response.status === 409) setProblem('One a day. That’s the whole point. Come back tomorrow.');
       else if (response.status === 401) setProblem('Sign in first. Then make the move.');
       else setProblem(data.error ?? 'That move didn’t save. It’s fine. Run it back.');
