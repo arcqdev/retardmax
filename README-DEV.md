@@ -31,4 +31,6 @@ Create a D1 database named `retardmax` and an R2 bucket named `retardmax-media`,
 
 ## Intentional dev substitutions
 
-Fake auth creates local users without Google. Fake payments apply the publish/boost effect immediately without Stripe. Share cards use the documented fallback: `/api/og/:postId.png` redirects to the visually strong `/p/:id` card permalink with OG text metadata; a `workers-og`/Satori image was not shipped because it is not reliable under the current Astro Cloudflare adapter build.
+Fake auth creates local users without Google. Fake payments apply the publish/boost effect immediately without Stripe.
+
+Share cards are real `workers-og` images: `/api/og/:postId.png` renders the post, and `/api/og/site.png` is the default card for every other page. Satori ships no font and no emoji table, so the route fetches `public/fonts/anton.woff` from its own origin — without it the card falls back to a serif face and emoji render as tofu boxes. Keep that file in place.

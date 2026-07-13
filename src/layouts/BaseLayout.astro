@@ -1,26 +1,32 @@
 ---
 import '../styles/global.css';
 import { getEnv } from '@/lib/env';
-const { title = 'Retardmax — make a bold move', description = 'One bold move a day. Keep receipts.' } = Astro.props;
+const { title = 'Retardmax — make a bold move', description = 'One bold move a day. Keep receipts.', image } = Astro.props;
 const user = Astro.locals.user;
 const env = getEnv(Astro.locals);
+const origin = (env?.SITE_URL ?? Astro.url.origin).replace(/\/$/, '');
+const ogImage = image ?? `${origin}/api/og/site.png`;
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content="#090909" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="RETARDMAX" />
+    <meta property="og:url" content={origin + Astro.url.pathname} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:image" content={ogImage} />
     <slot name="head" />
   </head>
   <body class="poster-grid min-h-screen">
-    <header class="sticky top-0 z-20 border-b border-white/10 bg-ink/90 backdrop-blur">
+    <header class="sticky top-0 z-20 border-b border-white/10 bg-ink/95 backdrop-blur-lg">
       <nav class="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-4">
         <a href="/" class="font-display text-2xl tracking-tight text-white">RETARD<span class="text-flame">MAX</span></a>
         <div class="hidden items-center gap-4 text-sm font-bold text-white/65 sm:flex">
