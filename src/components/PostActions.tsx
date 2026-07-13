@@ -1,8 +1,10 @@
 import { useState } from 'react';
 
 const NETWORK_FAIL = 'Didn’t go through. It’s fine. Run it back.';
+const CHIP = 'inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-1.5 font-black uppercase tracking-wide transition enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed';
+const QUIET = 'border-white/15 bg-white/5 text-white/75 enabled:hover:border-flame/60 enabled:hover:text-white';
 
-export default function PostActions({ postId, initialVotes, initialBoosts, voted = false, canVote = true, canBoost = false, canReport = false, body }: { postId: string; initialVotes: number; initialBoosts: number; voted?: boolean; canVote?: boolean; canBoost?: boolean; canReport?: boolean; body: string }) {
+export default function PostActions({ postId, initialVotes, initialBoosts, voted = false, signedIn = false, isOwner = false, body }: { postId: string; initialVotes: number; initialBoosts: number; voted?: boolean; signedIn?: boolean; isOwner?: boolean; body: string }) {
   const [votes, setVotes] = useState(initialVotes);
   const [boosts, setBoosts] = useState(initialBoosts);
   const [didVote, setDidVote] = useState(voted);
@@ -13,6 +15,9 @@ export default function PostActions({ postId, initialVotes, initialBoosts, voted
   const [reason, setReason] = useState('');
   const [reportProblem, setReportProblem] = useState('');
   const [reporting, setReporting] = useState(false);
+
+  const canVote = signedIn && !isOwner;
+  const canReport = signedIn && !isOwner;
 
   async function vote() {
     if (!canVote || busy) return;
@@ -29,7 +34,7 @@ export default function PostActions({ postId, initialVotes, initialBoosts, voted
   }
 
   async function boost() {
-    if (!canBoost || busy) return;
+    if (!signedIn || busy) return;
     setBusy(true); setProblem('');
     try {
       const response = await fetch('/api/checkout/boost', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ postId }) });
@@ -61,13 +66,21 @@ export default function PostActions({ postId, initialVotes, initialBoosts, voted
   }
 
   return (
-    <div className="min-w-0 flex-1 space-y-2">
+    <div className="min-w-0 space-y-2">
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <button className={`inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-1.5 font-black uppercase tracking-wide transition enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed ${didVote ? 'border-flame bg-flame text-white shadow-lg shadow-flame/25' : 'border-white/15 bg-white/5 text-white/75 enabled:hover:border-flame/60 enabled:hover:text-white'}`} onClick={vote} disabled={!canVote || busy} aria-pressed={didVote} title={didVote ? 'Take back your W' : 'Give this a W'}>W <span className="tabular-nums">{votes}</span></button>
-        <button className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3.5 py-1.5 font-black uppercase tracking-wide text-white/75 transition enabled:hover:-translate-y-0.5 enabled:hover:border-flame/60 enabled:hover:text-white disabled:cursor-not-allowed" onClick={boost} disabled={!canBoost || busy} title={canBoost ? 'Boost this post for $1' : 'Boosts'}><span aria-hidden="true">⚡</span> <span className="tabular-nums">{boosts}</span>{canBoost ? <span>Boost $1</span> : null}</button>
-        <button className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3.5 py-1.5 font-bold uppercase tracking-wide text-white/60 transition hover:-translate-y-0.5 hover:border-white/30 hover:text-white" onClick={share} title="Share to X">Share</button>
+        {signedIn ? (
+          <button className={`${CHIP} ${didVote ? 'border-flame bg-flame text-white shadow-lg shadow-flame/25' : QUIET} ${isOwner ? 'opacity-60' : ''}`} onClick={vote} disabled={!canVote || busy} aria-pressed={didVote} title={isOwner ? 'Ws come from other people.' : didVote ? 'Take back your W' : 'Give this a W'}>W <span className="tabular-nums">{votes}</span></button>
+        ) : (
+          <a className={`${CHIP} ${QUIET} hover:-translate-y-0.5`} href="/api/auth/login" title="Sign in to give this a W">W <span className="tabular-nums">{votes}</span></a>
+        )}
+        {signedIn ? (
+          <button className={`${CHIP} ${QUIET}`} onClick={boost} disabled={busy} title="Boost this post for $1 — +5 on today’s board"><span aria-hidden="true">⚡</span> <span className="tabular-nums">{boosts}</span> <span>Boost $1</span></button>
+        ) : (
+          <a className={`${CHIP} ${QUIET} hover:-translate-y-0.5`} href="/api/auth/login" title="Sign in to boost this post"><span aria-hidden="true">⚡</span> <span className="tabular-nums">{boosts}</span> <span>Boost $1</span></a>
+        )}
+        <button className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3.5 py-1.5 font-bold uppercase tracking-wide text-white/60 transition hover:-translate-y-0.5 hover:border-white/30 hover:text-white" onClick={share} title="Share this to X">Share</button>
         {canReport && !reportSent && (
-          <button className="rounded-lg px-2 py-1.5 text-xs font-bold leading-none text-white/25 transition hover:text-white/60" onClick={() => { setReportOpen((open) => !open); setReportProblem(''); }} aria-expanded={reportOpen} title="Report this post">⋯<span className="sr-only"> Report this post</span></button>
+          <button className="rounded-lg px-2 py-1.5 text-xs font-bold leading-none text-white/35 transition hover:text-white/70" onClick={() => { setReportOpen((open) => !open); setReportProblem(''); }} aria-expanded={reportOpen} aria-label="Report this post" title="Report this post">⋯</button>
         )}
       </div>
 
