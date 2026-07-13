@@ -29,7 +29,7 @@ const rankColor = medal === 'gold' ? 'text-gold' : medal === 'silver' ? 'text-si
       <a href={`/p/${post.id}`} class="mt-3 block whitespace-pre-wrap text-xl font-bold leading-snug tracking-tight hover:text-white/80 sm:text-2xl">{post.body}</a>
       {post.imageKey && <img src={`/media/${post.imageKey}`} alt="Post image" class="mt-4 max-h-96 w-full rounded-xl border border-white/10 object-cover" />}
       <div class="mt-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-white/5 pt-4">
-        <PostActions client:load postId={post.id} initialVotes={post.wCount} initialBoosts={post.boostCount} voted={post.voted} canVote={Boolean(user) && !isOwner && post.visibility === 'public'} canBoost={Boolean(user) && post.visibility === 'public'} body={post.body} />
+        <PostActions client:load postId={post.id} initialVotes={post.wCount} initialBoosts={post.boostCount} voted={post.voted} canVote={Boolean(user) && !isOwner && post.visibility === 'public'} canBoost={Boolean(user) && post.visibility === 'public'} canReport={Boolean(user) && !isOwner && post.visibility === 'public'} body={post.body} />
         <span class="font-display text-sm tabular-nums text-white/30">{post.dailyScore} <span class="text-white/25">PTS</span></span>
       </div>
     </div>

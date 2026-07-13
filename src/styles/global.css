@@ -27,6 +27,28 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: non
 /* Text inputs — consistent field treatment with a flame focus ring */
 .field { @apply w-full rounded-xl border border-white/10 bg-black/30 p-3 outline-none transition placeholder:text-white/30 focus:border-flame/60 focus:ring-2 focus:ring-flame/40; }
 
+/* Inline error/notice copy inside islands — errors stay in the page, never a browser dialog */
+.notice { @apply rounded-lg border px-3 py-2 text-sm font-bold; }
+.notice-bad { @apply notice border-flame/40 bg-flame/10 text-flame; }
+.notice-ok { @apply notice border-white/15 bg-white/5 text-white/65; }
+
+/* Payment return moment — one-shot poster slam, no confetti libraries */
+.slam { animation: slam 420ms cubic-bezier(0.2, 0.9, 0.25, 1) both; }
+.slam-delayed { animation: slam 420ms cubic-bezier(0.2, 0.9, 0.25, 1) 120ms both; }
+@keyframes slam { from { opacity: 0; transform: scale(1.14) translateY(-6px); } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
+
+/* Landing manifesto — scroll-driven type. Fallback everywhere else: plain visible text. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .scrub-line { animation: scrub-line linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
+    .scrub-block { animation: scrub-block linear both; animation-timeline: view(); animation-range: entry 8% cover 38%; }
+    .ticker-track { animation: ticker-drift linear both; animation-timeline: scroll(root block); }
+  }
+}
+@keyframes scrub-line { from { opacity: 0; transform: translate3d(0, 24%, 0); } to { opacity: 1; transform: none; } }
+@keyframes scrub-block { from { opacity: 0.15; transform: translate3d(0, 12%, 0); } to { opacity: 1; transform: none; } }
+@keyframes ticker-drift { to { transform: translate3d(-38%, 0, 0); } }
+
 /* Sports-standings medal accents for the top 3 leaderboard rows */
 .medal { @apply relative; }
 .medal::before { content: ''; @apply pointer-events-none absolute inset-y-0 left-0 w-1 rounded-l-2xl; }

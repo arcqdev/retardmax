@@ -1,0 +1,37 @@
+---
+// Landing state after a Stripe return. `paid` is the growth moment: share is the only CTA.
+interface Props { state: 'paid' | 'boosted' | 'canceled'; postId: string; body: string; siteUrl: string }
+const { state, postId, body, siteUrl } = Astro.props;
+const url = `${siteUrl.replace(/\/$/, '')}/p/${postId}`;
+const intent = `https://x.com/intent/post?text=${encodeURIComponent(`${body} — RETARDMAX\n${url}`)}`;
+---
+{state === 'paid' && (
+  <div class="slam card overflow-hidden border-flame/45 bg-flame/[0.08] p-6 text-center sm:p-8">
+    <p class="eyebrow">Receipt filed · you’re on the board</p>
+    <p class="mt-2 font-display text-5xl leading-[0.9] sm:text-7xl">IT’S PUBLIC.<br /><span class="text-flame">ZERO DUE DILIGENCE,<br />MAX CONVICTION.</span></p>
+    <p class="mx-auto mt-4 max-w-sm text-sm font-bold text-white/60">The move is out there now. Ws don’t collect themselves — go tell the timeline.</p>
+    <a class="slam-delayed btn-flame mt-6 w-full px-6 py-4 text-base sm:w-auto sm:text-lg" href={intent} target="_blank" rel="noreferrer" data-share-intent={postId}>Post it to 𝕏</a>
+    <p class="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-white/30">Nothing moves if nothing moves.</p>
+  </div>
+)}
+{state === 'boosted' && (
+  <div class="slam card border-white/20 bg-white/[0.07] p-5 text-center">
+    <p class="font-display text-3xl sm:text-4xl"><span aria-hidden="true">⚡</span> BOOST LANDED.</p>
+    <p class="mt-1.5 text-sm font-bold text-white/55">Your dollar moved somebody up the board. <a class="text-flame hover:underline" href={intent} target="_blank" rel="noreferrer" data-share-intent={postId}>Send it to 𝕏</a> and finish the job.</p>
+  </div>
+)}
+{state === 'canceled' && (
+  <div class="notice-ok flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+    <span>Didn’t pay. It’s fine. Your post is still private.</span>
+    <span class="text-white/35">The $1 button’s right there when you grow a spine.</span>
+  </div>
+)}
+<script>
+  // Same share_clicked event the PostActions island fires, so the share loop stays measurable.
+  document.querySelectorAll('[data-share-intent]').forEach((link) => {
+    link.addEventListener('click', () => {
+      const postId = link.getAttribute('data-share-intent');
+      void fetch('/api/analytics', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ event: 'share_clicked', properties: { post_id: postId } }) });
+    });
+  });
+</script>
