@@ -7,11 +7,11 @@
     {
       "binding": "DB",
       "database_name": "retardmax",
-      "database_id": "f0664fe1-f5c6-4366-81df-93bd1feef5d1",
+      "database_id": "05599846-5e97-47bb-809a-0c84cdfc6ccd",
       "migrations_dir": "drizzle/migrations"
     }
   ],
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "retardmax-media" }],
-  "vars": { "SITE_URL": "https://retardmax.eddielaw296.workers.dev" },
+  "vars": { "SITE_URL": "https://retardmax.arcqdev.workers.dev" },
   "observability": { "enabled": true, "head_sampling_rate": 1 }
 }
